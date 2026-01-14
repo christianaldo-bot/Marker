@@ -20,8 +20,8 @@ LBL_BROKEN = os.path.join(BASE, "labels/broken")
 LBL_HOM    = os.path.join(BASE, "labels/hom")
 LBL_AUG    = os.path.join(BASE, "labels/aug")
 
-for d in [IMG_BROKEN, IMG_HOM, IMG_AUG,
-          LBL_BROKEN, LBL_HOM, LBL_AUG]:
+for d in [IMG_BASE, IMG_BROKEN, IMG_HOM, IMG_AUG,
+          LBL_BASE, LBL_BROKEN, LBL_HOM, LBL_AUG]:
     os.makedirs(d, exist_ok=True)
 
 # ============================================================
@@ -32,14 +32,13 @@ DICT = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_1000)
 
 MARKER_SIZE = 200
 GAP = int(MARKER_SIZE * 0.2)
-
 CANVAS_H = MARKER_SIZE * 3
 CANVAS_W = MARKER_SIZE * 4 + GAP
 
 POS1 = (MARKER_SIZE, MARKER_SIZE)
 POS2 = (MARKER_SIZE * 2 + GAP, MARKER_SIZE)
 
-N_MARKER_ID = 10
+N_MARKER_ID = 4
 N_AUG = 5
 
 # ============================================================
@@ -191,7 +190,7 @@ def faded(img, corner, fade=0.5):
     
     :param img: IMAGE MARKER
     :param corner: corner position
-    :param thick: faded level
+    :param fade: faded level
     '''
     out = np.clip(img*(1-fade)+255*fade, 0, 255).astype(np.uint8)
     return out, corner
@@ -252,7 +251,7 @@ def paste(canvas, img, corner, pos):
     :param canvas: canvas
     :param img: marker image
     :param corner: corner position of marker 
-    :param pos: bottom-left position of the marker on the canvas
+    :param pos: top-left position of the marker on the canvas
     '''
     x, y = pos
     h, w = img.shape[:2]
@@ -357,8 +356,13 @@ def run():
             c2g = paste(canvas,m2,c2,POS2)
 
             name = f"marker_{id1}_{id2}_{dname}"
-            cv2.imwrite(os.path.join(IMG_BROKEN,name+".jpg"),canvas)
-            save_label(os.path.join(LBL_BROKEN,name+".txt"),
+            if dname == "clean":
+                cv2.imwrite(os.path.join(IMG_BASE,name+".jpg"),canvas)
+                save_label(os.path.join(LBL_BASE,name+".txt"),
+                        id1,id2,c1g,c2g,canvas.shape[1],canvas.shape[0])
+            else:            
+                cv2.imwrite(os.path.join(IMG_BROKEN,name+".jpg"),canvas)
+                save_label(os.path.join(LBL_BROKEN,name+".txt"),
                        id1,id2,c1g,c2g,canvas.shape[1],canvas.shape[0])
 
             # ============================================================
